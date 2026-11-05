@@ -1,5 +1,6 @@
 # language: Python, file: bot.py, target: Python 3.10+
-# *Казино бот: рулетка (1 win -> 2-4 lose), кейсы, профиль, Flask для Render*
+# *Бот: Казино (подкрутка), кейсы, профиль. Админка по юзернейму @above*
+# *зависимости: aiogram, aiosqlite, flask*
 
 import asyncio
 import random
@@ -14,15 +15,22 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ========== НАСТРОЙКИ ==========
-BOT_TOKEN = os.getenv("BOT_TOKEN", "1780278979:BAaWGebI8Z-FbY-bfAtk5pOzrw1nZOMITgX")
-ADMIN_ID = int(os.getenv("ADMIN_ID", "5870776717"))
-ADMIN_USERNAME = "above"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "ТВОЙ_НОВЫЙ_ТОКЕН")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0")) # Можешь оставить 0, если работаешь только по юзернейму
+ADMIN_USERNAME = "above" # Твой юзернейм для админки и связи
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# --- Flask для Render ---
+# --- Проверка на админа по юзернейму ---
+def is_admin(user: types.User) -> bool:
+    if not user.username:
+        return False
+    # Сравниваем без учета регистра
+    return user.username.lower() == ADMIN_USERNAME.lower()
+
+# --- Flask для Render (защита от сна) ---
 app = Flask(__name__)
 @app.route('/')
 def health(): return "Casino is running", 200
@@ -57,6 +65,11 @@ async def set_streak(user_id, streak):
     async with aiosqlite.connect("casino.db") as db:
         await db.execute("UPDATE users SET lose_streak = ? WHERE user_id = ?", (streak, user_id))
         await db.commit()
+
+# --- Команда для получения ID (напиши боту /myid) ---
+@dp.message(Command("myid"))
+async def cmd_myid(message: types.Message):
+    await message.answer(f"Твой ID: <code>{message.from_user.id}</code>\nТвой юзернейм: @{message.from_user.username}", parse_mode="HTML")
 
 # --- Главное меню ---
 def get_main_menu(balance):
@@ -281,7 +294,7 @@ async def back(call: CallbackQuery):
 async def main():
     await init_db()
     threading.Thread(target=run_flask, daemon=True).start()
-    print("[*] GiftUpgrader запущен")
+    print(f"[*] Бот запущен. Админ: @{ADMIN_USERNAME}")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
