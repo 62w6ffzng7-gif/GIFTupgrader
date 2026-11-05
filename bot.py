@@ -15,7 +15,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ========== НАСТРОЙКИ ==========
-BOT_TOKEN = os.getenv("BOT_TOKEN", "ТВОЙ_НОВЫЙ_ТОКЕН")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "1780278979:ra-cpS_v5nVv7PFYhEbPWteUtuwsiD2t1Pr")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0")) # Можешь оставить 0, если работаешь только по юзернейму
 ADMIN_USERNAME = "above" # Твой юзернейм для админки и связи
 
